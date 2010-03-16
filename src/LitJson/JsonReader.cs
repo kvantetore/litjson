@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Globalization;
 
 
 namespace LitJson
@@ -257,7 +258,7 @@ namespace LitJson
                 number.IndexOf ('E') != -1) {
 
                 double n_double;
-                if (Double.TryParse (number, out n_double)) {
+                if (Double.TryParse (number, NumberStyles.Float, System.Globalization.NumberFormatInfo.InvariantInfo, out n_double)) {
                     token = JsonToken.Double;
                     token_value = n_double;
 
