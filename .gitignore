@@ -10,3 +10,7 @@ configure
 discheck.out
 install-sh
 missing
+
+*.suo
+/src/LitJson/obj
+/src/LitJson/bin

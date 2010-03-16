@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C# Express 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LitJson", "src\LitJson\LitJson.csproj", "{7C3FD56F-D164-4FAB-BF3B-DBBBF3FA750B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7C3FD56F-D164-4FAB-BF3B-DBBBF3FA750B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C3FD56F-D164-4FAB-BF3B-DBBBF3FA750B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C3FD56F-D164-4FAB-BF3B-DBBBF3FA750B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C3FD56F-D164-4FAB-BF3B-DBBBF3FA750B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

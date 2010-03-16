@@ -1,3 +1,5 @@
 *.dll
 *.mdb
 TestResult.xml
+[Dd]ebug/
+[Rr]elease/
