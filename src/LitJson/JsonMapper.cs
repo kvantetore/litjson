@@ -395,7 +395,7 @@ namespace LitJson
 
                 while (true) {
                     object item = ReadValue (elem_type, reader);
-                    if (reader.Token == JsonToken.ArrayEnd)
+                    if (reader.Token == JsonToken.ArrayEnd && item == null)
                         break;
 
                     list.Add (item);
