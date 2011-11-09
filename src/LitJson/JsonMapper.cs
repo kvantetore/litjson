@@ -620,6 +620,18 @@ namespace LitJson
                               typeof (uint), importer);
 
             importer = delegate (object input) {
+                return Convert.ToInt64 ((int) input);
+            };
+            RegisterImporter (base_importers_table, typeof (int),
+                              typeof (long), importer);
+
+            importer = delegate (object input) {
+                return Convert.ToUInt64 ((int) input);
+            };
+            RegisterImporter (base_importers_table, typeof (int),
+                              typeof (ulong), importer);
+
+            importer = delegate (object input) {
                 return Convert.ToSingle ((int) input);
             };
             RegisterImporter (base_importers_table, typeof (int),

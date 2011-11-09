@@ -50,6 +50,10 @@ namespace LitJson
             get { return type == JsonType.Boolean; }
         }
 
+        public bool IsNumber {
+            get { return IsDouble || IsInt || IsLong; }
+        }
+
         public bool IsDouble {
             get { return type == JsonType.Double; }
         }
@@ -414,29 +418,52 @@ namespace LitJson
 
         public static explicit operator Double (JsonData data)
         {
-            if (data.type != JsonType.Double)
-                throw new InvalidCastException (
-                    "Instance of JsonData doesn't hold a double");
-
-            return data.inst_double;
+            checked {
+                switch (data.type) {
+                case JsonType.Int:     return (Double)data.inst_int;
+                case JsonType.Long:    return (Double)data.inst_long;
+                case JsonType.Double:  return         data.inst_double;
+                default:
+                    throw new InvalidCastException (
+                        "Instance of JsonData doesn't hold a number");
+                }
+            }
         }
 
         public static explicit operator Int32 (JsonData data)
         {
-            if (data.type != JsonType.Int)
-                throw new InvalidCastException (
-                    "Instance of JsonData doesn't hold an int");
-
-            return data.inst_int;
+            checked {
+                switch (data.type) {
+                case JsonType.Int:     return        data.inst_int;
+                case JsonType.Long:    return (Int32)data.inst_long;
+                case JsonType.Double:
+                    if (data.inst_double != Math.Floor(data.inst_double))
+                        throw new InvalidCastException(
+                            "Instance of JsonData doesn't hold an integer");
+                    return (Int32)data.inst_double;
+                default:
+                    throw new InvalidCastException (
+                        "Instance of JsonData doesn't hold a number");
+                }
+            }
         }
 
         public static explicit operator Int64 (JsonData data)
         {
-            if (data.type != JsonType.Long)
-                throw new InvalidCastException (
-                    "Instance of JsonData doesn't hold an int");
-
-            return data.inst_long;
+            checked {
+                switch (data.type) {
+                case JsonType.Int:     return (Int64)data.inst_int;
+                case JsonType.Long:    return        data.inst_long;
+                case JsonType.Double:
+                    if (data.inst_double != Math.Floor(data.inst_double))
+                        throw new InvalidCastException(
+                            "Instance of JsonData doesn't hold an integer");
+                    return (Int64)data.inst_double;
+                default:
+                    throw new InvalidCastException (
+                        "Instance of JsonData doesn't hold a number");
+                }
+            }
         }
 
         public static explicit operator String (JsonData data)
