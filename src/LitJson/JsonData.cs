@@ -727,7 +727,7 @@ namespace LitJson
 
             if (type != JsonType.None)
                 throw new InvalidOperationException (
-                    "Instance of JsonData is not a dictionary");
+                    "Instance of JsonData is a " + type.ToString() + ", not a dictionary");
 
             type = JsonType.Object;
             inst_object = new Dictionary<string, JsonData> ();
