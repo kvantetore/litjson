@@ -305,14 +305,24 @@ namespace LitJson
 
         private static object ReadValue (Type inst_type, JsonReader reader)
         {
+            // if caller asks for a JsonData or other IJsonWrapper, use the factory-based parsing code;
+            //   this may occur if a normal object contains JsonData or JsonData[] member(s)
+            if (typeof (IJsonWrapper).IsAssignableFrom (inst_type))
+                return ReadValue (() => (IJsonWrapper) Activator.CreateInstance (inst_type), reader);
+
             reader.Read ();
 
-            if (reader.Token == JsonToken.ArrayEnd)
+            // may occur at end of list or object
+            if (reader.Token == JsonToken.ArrayEnd ||
+                reader.Token == JsonToken.ObjectEnd)
                 return null;
+
+            Type underlying_type = Nullable.GetUnderlyingType(inst_type);
+            Type value_type = underlying_type ?? inst_type;
 
             if (reader.Token == JsonToken.Null) {
 
-                if (! inst_type.IsClass)
+                if (! inst_type.IsClass && underlying_type == null)
                     throw new JsonException (String.Format (
                             "Can't assign null to an instance of type {0}",
                             inst_type));
@@ -328,16 +338,16 @@ namespace LitJson
 
                 Type json_type = reader.Value.GetType ();
 
-                if (inst_type.IsAssignableFrom (json_type))
+                if (value_type.IsAssignableFrom (json_type))
                     return reader.Value;
 
                 // If there's a custom importer that fits, use it
                 if (custom_importers_table.ContainsKey (json_type) &&
                     custom_importers_table[json_type].ContainsKey (
-                        inst_type)) {
+                        value_type)) {
 
                     ImporterFunc importer =
-                        custom_importers_table[json_type][inst_type];
+                        custom_importers_table[json_type][value_type];
 
                     return importer (reader.Value);
                 }
@@ -345,20 +355,20 @@ namespace LitJson
                 // Maybe there's a base importer that works
                 if (base_importers_table.ContainsKey (json_type) &&
                     base_importers_table[json_type].ContainsKey (
-                        inst_type)) {
+                        value_type)) {
 
                     ImporterFunc importer =
-                        base_importers_table[json_type][inst_type];
+                        base_importers_table[json_type][value_type];
 
                     return importer (reader.Value);
                 }
 
                 // Maybe it's an enum
-                if (inst_type.IsEnum)
-                    return Enum.ToObject (inst_type, reader.Value);
+                if (value_type.IsEnum)
+                    return Enum.ToObject (value_type, reader.Value);
 
                 // Try using an implicit conversion operator
-                MethodInfo conv_op = GetConvOp (inst_type, json_type);
+                MethodInfo conv_op = GetConvOp (value_type, json_type);
 
                 if (conv_op != null)
                     return conv_op.Invoke (null,
@@ -468,7 +478,8 @@ namespace LitJson
         {
             reader.Read ();
 
-            if (reader.Token == JsonToken.ArrayEnd ||
+            if (reader.Token == JsonToken.ObjectEnd ||
+                reader.Token == JsonToken.ArrayEnd ||
                 reader.Token == JsonToken.Null)
                 return null;
 
@@ -509,6 +520,8 @@ namespace LitJson
 
                     ((IList) instance).Add (item);
                 }
+
+                return instance;
             }
             else if (reader.Token == JsonToken.ObjectStart) {
                 instance.SetJsonType (JsonType.Object);
@@ -525,9 +538,10 @@ namespace LitJson
                         factory, reader);
                 }
 
+                return instance;
             }
 
-            return instance;
+            throw new JsonException("Unexpected Token " + reader.Token.ToString());
         }
 
         private static void RegisterBaseExporters ()
@@ -581,86 +595,46 @@ namespace LitJson
 
         private static void RegisterBaseImporters ()
         {
-            ImporterFunc importer;
+            RegisterBaseIntegralImporters<Int32> ();
+            RegisterBaseIntegralImporters<Int64> ();
 
-            importer = delegate (object input) {
-                return Convert.ToByte ((int) input);
-            };
-            RegisterImporter (base_importers_table, typeof (int),
-                              typeof (byte), importer);
+            RegisterBaseCastImporter<Double, float  > ();
+            RegisterBaseCastImporter<Double, decimal> ();
 
-            importer = delegate (object input) {
-                return Convert.ToUInt64 ((int) input);
-            };
-            RegisterImporter (base_importers_table, typeof (int),
-                              typeof (ulong), importer);
+            RegisterImporter(base_importers_table, typeof (string), typeof (DateTime),
+                             o => Convert.ToDateTime ((string)o, datetime_format));
+        }
 
-            importer = delegate (object input) {
-                return Convert.ToSByte ((int) input);
-            };
-            RegisterImporter (base_importers_table, typeof (int),
-                              typeof (sbyte), importer);
+        private static void RegisterBaseIntegralImporters<T> ()
+        {
+            RegisterBaseCastImporter<T, sbyte > ();
+            RegisterBaseCastImporter<T, short > ();
+            RegisterBaseCastImporter<T, int   > ();
+            RegisterBaseCastImporter<T, long  > ();
 
-            importer = delegate (object input) {
-                return Convert.ToInt16 ((int) input);
-            };
-            RegisterImporter (base_importers_table, typeof (int),
-                              typeof (short), importer);
+            RegisterBaseCastImporter<T, byte  > ();
+            RegisterBaseCastImporter<T, ushort> ();
+            RegisterBaseCastImporter<T, uint  > ();
+            RegisterBaseCastImporter<T, ulong > ();
 
-            importer = delegate (object input) {
-                return Convert.ToUInt16 ((int) input);
-            };
-            RegisterImporter (base_importers_table, typeof (int),
-                              typeof (ushort), importer);
+            RegisterBaseCastImporter<T, float  > ();
+            RegisterBaseCastImporter<T, double > ();
+            RegisterBaseCastImporter<T, decimal> ();
+        }
 
-            importer = delegate (object input) {
-                return Convert.ToUInt32 ((int) input);
-            };
-            RegisterImporter (base_importers_table, typeof (int),
-                              typeof (uint), importer);
-
-            importer = delegate (object input) {
-                return Convert.ToSingle ((int) input);
-            };
-            RegisterImporter (base_importers_table, typeof (int),
-                              typeof (float), importer);
-
-            importer = delegate (object input) {
-                return Convert.ToDouble ((int) input);
-            };
-            RegisterImporter (base_importers_table, typeof (int),
-                              typeof (double), importer);
-
-            importer = delegate (object input) {
-                return Convert.ToDecimal ((double) input);
-            };
-            RegisterImporter (base_importers_table, typeof (double),
-                              typeof (decimal), importer);
-
-
-            importer = delegate (object input) {
-                return Convert.ToUInt32 ((long) input);
-            };
-            RegisterImporter (base_importers_table, typeof (long),
-                              typeof (uint), importer);
-
-            importer = delegate (object input) {
-                return Convert.ToChar ((string) input);
-            };
-            RegisterImporter (base_importers_table, typeof (string),
-                              typeof (char), importer);
-
-            importer = delegate (object input) {
-                return Convert.ToDateTime ((string) input, datetime_format);
-            };
-            RegisterImporter (base_importers_table, typeof (string),
-                              typeof (DateTime), importer);
+        private static void RegisterBaseCastImporter<T,U> ()
+        {
+            RegisterImporter (base_importers_table, typeof (T), typeof (U),
+                              o => Convert.ChangeType (o, typeof (U)));;
         }
 
         private static void RegisterImporter (
             IDictionary<Type, IDictionary<Type, ImporterFunc>> table,
             Type json_type, Type value_type, ImporterFunc importer)
         {
+            if (value_type.IsAssignableFrom(json_type))
+                return;  // no need
+
             if (! table.ContainsKey (json_type))
                 table.Add (json_type, new Dictionary<Type, ImporterFunc> ());
 
