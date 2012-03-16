@@ -1,3 +1,29 @@
+2012-03-15  Chip Salzenberg  <chip@pobox.com>
+
+	* NEWS:
+	  Update version to 0.5.0.2 (forked)
+	  Backfill with info about 0.5.0.1 as well
+
+	* JsonMapper.cs: Support mapping Nullable<>.  Support mapping all
+	obvious numeric conversions among integers and among reals.
+	* JSonDatac.cs: Add "IsNumber" property.  Automatically perform
+	any lossless numeric conversion when type casting.  Improve error
+	messages when expecting an IDictionary.
+
+2011-11-09  Chip Salzenberg  <chip@pobox.com>
+
+	Version 0.5.0.1 (forked)
+
+	From Joe Osborn <joe@universalhappymaker.com>:
+	* JsonMapper.cs: Support mapping JsonData[] (JsonData lists)
+
+	From Tore <tore@vostopia.com>:
+	* JsonMapper.cs: Properly read nested arrays; do not end all
+	arrays when the first "]" is found
+	* JsonData.cs: Write null objects as JSON "null"
+	* JsonReader.cs: Parse numbers in invariant culture.
+	* LitJson.sln etc: Visual Studio project files
+
 2007-10-04  Leonardo Boshell  <leonardoboshell@users.sourceforge.net>
 
 	* Makefile.am:
