@@ -1,3 +1,43 @@
+===============   ------------
+LitJSON 0.5.0.2 | 2011-11-09
+===============   ------------
+
+New features and improvements:
+
+* Nullable<> types are transparently mapped.
+
+* All numeric types are automatically converted in C# type conversion
+  and JSON mapping; exceptions should be thrown if the target type
+  can't represent the value.
+
+* JsonData now has IsNumber property to cover all three numeric types.
+
+* If mapping expects a dictionary and finds something else, the
+  exception says what it found.
+
+
+===============   ------------
+LitJSON 0.5.0.1 | 2011-11-09
+===============   ------------
+
+New features and improvements:
+
+* Support mapping JsonData[] (JsonData lists)
+   -- Joe Osborn <joe@universalhappymaker.com>
+
+* Visual Studio project files
+   -- Tore <tore@vostopia.com>:
+
+Bug fixes, all from Tore <tore@vostopia.com>:
+
+* Properly read nested arrays; do not end all arrays when the first
+  "]" is found
+
+* Map null object <-> JSON "null"
+
+* Parse numbers in invariant culture.
+
+
 =============   ----------
 LitJSON 0.5.0 | 2007-10-04
 =============   ----------
